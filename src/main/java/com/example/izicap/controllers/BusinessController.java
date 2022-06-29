@@ -7,9 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.supercsv.cellprocessor.constraint.NotNull;
+import org.supercsv.cellprocessor.constraint.UniqueHashCode;
+import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.cellprocessor.ift.DateCellProcessor;
+import org.supercsv.cellprocessor.ift.StringCellProcessor;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
+import org.supercsv.util.CsvContext;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -91,7 +97,7 @@ public class BusinessController {
             try {
                 Establishment establishment = businessService.getEstablishment(siret);
                 if(establishment != null) {
-                    csvWriter.write(establishment, nameMapping);
+                    csvWriter.write(establishment, nameMapping, getProcessors());
                 }
             }
             catch (final HttpClientErrorException e) {
@@ -101,5 +107,26 @@ public class BusinessController {
         }
 
         csvWriter.close();
+    }
+
+    private static CellProcessor[] getProcessors() {
+        return new CellProcessor[] {
+                new UniqueHashCode(), // Id
+                new StringCellProcessor() {
+                    @Override
+                    public <String> String execute(Object o, CsvContext csvContext) {
+                        return (String) ("=\"" + o.toString() + "\"");
+                    }
+                }, // Nic
+                new NotNull(), // Full Address
+                new DateCellProcessor() {
+                    @Override
+                    public <String> String execute(Object o, CsvContext csvContext) {
+                        return (String) ("=\"" + new SimpleDateFormat("dd/MM/yyyy").format(o) + "\"");
+                    }
+                }, // Creation date
+                new NotNull(), // Full name
+                new NotNull() // TVA number
+        };
     }
 }
