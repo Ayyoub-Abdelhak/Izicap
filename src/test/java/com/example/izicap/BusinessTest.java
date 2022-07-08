@@ -19,7 +19,7 @@ public class BusinessTest {
 
     @Test
     public void testBusinessService() {
-        assertEquals(businessService.getEstablishment("52170053400014").getId(), 449811620);
+        assertEquals(businessService.getEstablishment("52170053400014").getId(), 1592335243);
     }
 
     @Test
@@ -29,6 +29,6 @@ public class BusinessTest {
                 Business.class,
                 "52170053400014"
         );
-        assertEquals(business.getEtablissement().getId(), 449811620);
+        assertEquals(business.getEtablissement().getId(), 1592335243);
     }
 }
